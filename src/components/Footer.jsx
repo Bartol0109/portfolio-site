@@ -10,6 +10,7 @@ export default function Footer() {
         <nav className="footer-nav">
           <Link to="/#about">About</Link>
           <Link to="/#contact">Contact</Link>
+          <Link to="/blog">Blog</Link>
           <Link to="/portfolio">Portfolio</Link>
         </nav>
       </div>

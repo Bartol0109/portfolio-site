@@ -10,6 +10,7 @@ const PortfolioIcon = () => (
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const location = useLocation()
   const isPortfolio = location.pathname === '/portfolio'
 
@@ -25,10 +26,35 @@ export default function Header() {
   }, [location])
 
   useEffect(() => {
+    let alive = true
+    async function check() {
+      try {
+        const res = await fetch('/api/admin/me.php', { credentials: 'include' })
+        const data = await res.json().catch(() => ({}))
+        if (!alive) return
+        setIsAdmin(Boolean(res.ok && data?.ok))
+      } catch {
+        if (!alive) return
+        setIsAdmin(false)
+      }
+    }
+    check()
+    return () => { alive = false }
+  }, [location.pathname])
+
+  useEffect(() => {
     document.body.classList.toggle('mobile-menu-open', menuOpen)
   }, [menuOpen])
 
   const closeMenu = () => setMenuOpen(false)
+
+  async function logout() {
+    try {
+      await fetch('/api/admin/logout.php', { method: 'POST', credentials: 'include' })
+    } finally {
+      setIsAdmin(false)
+    }
+  }
 
   return (
     <header className={`header ${scrolled ? 'header--scrolled' : ''}`}>
@@ -49,6 +75,12 @@ export default function Header() {
       <nav className="nav">
         <Link to="/#about" className="nav-link">about</Link>
         <Link to="/#contact" className="nav-link">contact</Link>
+        <Link to="/blog" className="nav-link">blog</Link>
+        {isAdmin ? (
+          <button type="button" className="nav-link nav-link--button" onClick={logout}>logout</button>
+        ) : (
+          <Link to="/admin/login" className="nav-link">admin</Link>
+        )}
         <Link
           to="/portfolio"
           className={`nav-icon ${isPortfolio ? 'nav-icon--active' : ''}`}
@@ -62,6 +94,18 @@ export default function Header() {
         <div className="mobile-menu-panel">
           <Link to="/#about" className="mobile-menu-link" onClick={closeMenu}>about</Link>
           <Link to="/#contact" className="mobile-menu-link" onClick={closeMenu}>contact</Link>
+          <Link to="/blog" className="mobile-menu-link" onClick={closeMenu}>blog</Link>
+          {isAdmin ? (
+            <button
+              type="button"
+              className="mobile-menu-link mobile-menu-link--button"
+              onClick={async () => { await logout(); closeMenu() }}
+            >
+              logout
+            </button>
+          ) : (
+            <Link to="/admin/login" className="mobile-menu-link" onClick={closeMenu}>admin</Link>
+          )}
           <Link to="/portfolio" className="mobile-menu-link" onClick={closeMenu}>portfolio</Link>
         </div>
       </div>
