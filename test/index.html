@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="hr">
+  <head>
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-KKBBKNGJ");
+    </script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test | GTM & GA Playground</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-KKBBKNGJ"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <nav class="topnav">
+      <a href="/" class="topnav-brand">← Bartol Portfolio</a>
+      <div class="topnav-links">
+        <a href="/">Home</a>
+        <a href="/portfolio">Portfolio</a>
+        <a href="/blog">Blog</a>
+        <a href="/test/" class="active">Test</a>
+      </div>
+    </nav>
+
+    <main class="wrap">
+      <h1>GTM / GA Test Playground</h1>
+      <p>
+        Stranica za treniranje Google Tag Managera i Google Analyticsa. Nije
+        povezana s React appom.
+      </p>
+
+      <section class="panel">
+        <h2>Data Layer eventi</h2>
+        <div class="btn-row">
+          <button class="gtm-test-button" data-event="test_button_click">
+            Pošalji test event
+          </button>
+          <button class="gtm-test-button" data-event="cta_click">
+            Pošalji cta_click event
+          </button>
+          <button
+            class="gtm-test-button gtm-test-button--outline"
+            data-event="form_submit"
+          >
+            Pošalji form_submit event
+          </button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Log</h2>
+        <pre id="log"></pre>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,6 +1,11 @@
-node_modules
-dist
+api/config.local.php
+**/error_log
+.ftpquota
+.ftp-deploy-sync-state.json
+.well-known/
+.well-known.zip
 .DS_Store
 *.log
 .env
 .env.local
+node_modules

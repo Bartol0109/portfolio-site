@@ -1,0 +1,13 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/visoradi/public_html/
+    - /bin/cp index.html $DEPLOYPATH
+    - /bin/cp .htaccess $DEPLOYPATH
+    - /bin/cp -R api $DEPLOYPATH
+    - /bin/cp -R assets $DEPLOYPATH
+    - /bin/cp -R favicon $DEPLOYPATH
+    - /bin/cp -R slike $DEPLOYPATH
+    - /bin/cp -R blog-uploads $DEPLOYPATH
+    - /bin/cp -R portfolio-uploads $DEPLOYPATH
+    - /bin/cp -R test $DEPLOYPATH
