@@ -21,6 +21,7 @@ export const translations = {
       menu: 'Menu',
       close: 'Close menu',
       switchLang: 'Switch to Croatian',
+      navigation: 'Navigation',
     },
     hero: {
       iam: 'Hi, I am',
@@ -49,6 +50,10 @@ export const translations = {
       title: 'Selected work',
       note: 'Projects from my degree, plus this site.',
       all: 'See all',
+      show: 'Selected projects',
+      prev: 'Previous project',
+      next: 'Next project',
+      dot: 'Show this project',
     },
     about: {
       title: 'About',
@@ -193,6 +198,7 @@ export const translations = {
       menu: 'Izbornik',
       close: 'Zatvori izbornik',
       switchLang: 'Prebaci na engleski',
+      navigation: 'Navigacija',
     },
     hero: {
       iam: 'Bok, ja sam',
@@ -221,6 +227,10 @@ export const translations = {
       title: 'Odabrani radovi',
       note: 'Zadaci s fakulteta, i ova stranica.',
       all: 'Svi radovi',
+      show: 'Odabrani radovi',
+      prev: 'Prethodni rad',
+      next: 'Sljedeći rad',
+      dot: 'Prikaži ovaj rad',
     },
     about: {
       title: 'O meni',

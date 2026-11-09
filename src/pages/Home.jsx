@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AboutDeck from '../components/AboutDeck'
 import Sidebar from '../components/Sidebar'
@@ -43,6 +43,128 @@ const SOCIAL = [
     ),
   },
 ]
+
+function WorkShow({ projects, t }) {
+  const [index, setIndex] = useState(0)
+  const [reduce, setReduce] = useState(false)
+  const [paused, setPaused] = useState(false)
+  const rootRef = useRef(null)
+  const dragX = useRef(null)
+  const swiped = useRef(false)
+  const count = projects.length
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const apply = () => setReduce(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  useEffect(() => {
+    if (reduce || paused || count < 2) return undefined
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % count), 5000)
+    return () => window.clearInterval(id)
+  }, [reduce, paused, count])
+
+  const go = (next) => setIndex(((next % count) + count) % count)
+
+  const onKeyDown = (e) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      go(index + 1)
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      go(index - 1)
+    }
+  }
+
+  return (
+    <div
+      className="show"
+      ref={rootRef}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={t.selected.show}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={(e) => {
+        if (!rootRef.current?.contains(e.relatedTarget)) setPaused(false)
+      }}
+      onKeyDown={onKeyDown}
+    >
+      <div
+        className="show-frame"
+        onPointerDown={(e) => { dragX.current = e.clientX }}
+        onPointerUp={(e) => {
+          if (dragX.current == null) return
+          const dx = e.clientX - dragX.current
+          dragX.current = null
+          if (Math.abs(dx) > 48) {
+            swiped.current = true
+            go(dx > 0 ? index - 1 : index + 1)
+          }
+        }}
+        onClickCapture={(e) => {
+          if (!swiped.current) return
+          e.preventDefault()
+          e.stopPropagation()
+          swiped.current = false
+        }}
+        onPointerCancel={() => { dragX.current = null }}
+      >
+        {projects.map((project, i) => {
+          const text = projectText(t, project)
+          const on = i === index
+          return (
+            <Link
+              key={project.id}
+              className={`show-slide${on ? ' is-on' : ''}`}
+              to={`/portfolio/${project.id}`}
+              state={{ project }}
+              aria-hidden={!on}
+              tabIndex={on ? 0 : -1}
+            >
+              <span className="show-photo">
+                <img src={project.image} alt="" />
+              </span>
+              <span className="show-copy">
+                <span className="show-meta">{text.category} · {project.year}</span>
+                <span className="show-title">{project.title}</span>
+                <span className="show-tag">{text.description}</span>
+              </span>
+            </Link>
+          )
+        })}
+      </div>
+      <div className="show-controls">
+        <button type="button" className="show-arrow" aria-label={t.selected.prev} onClick={() => go(index - 1)}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+            <path d="M10 3 5 8l5 5" />
+          </svg>
+        </button>
+        <div className="show-dots">
+          {projects.map((project, i) => (
+            <button
+              key={project.id}
+              type="button"
+              className={i === index ? 'is-on' : ''}
+              aria-label={`${t.selected.dot}: ${project.title}`}
+              aria-current={i === index ? 'true' : undefined}
+              onClick={() => setIndex(i)}
+            />
+          ))}
+        </div>
+        <button type="button" className="show-arrow" aria-label={t.selected.next} onClick={() => go(index + 1)}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+            <path d="M6 3l5 5-5 5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function HeroKicker({ lines }) {
   const [shown, setShown] = useState('')
@@ -110,7 +232,46 @@ export default function Home() {
   const { t } = useLanguage()
   const preview = isDevPreview()
   const [previewNote, setPreviewNote] = useState(false)
+  const heroRef = useRef(null)
+  const [motionOk, setMotionOk] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   useReveal(t.about.title)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const apply = () => setMotionOk(!mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  useEffect(() => {
+    const el = heroRef.current
+    if (!el || !motionOk) return undefined
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    const setSpot = (x, y) => {
+      el.style.setProperty('--spot-x', x)
+      el.style.setProperty('--spot-y', y)
+    }
+    const onPointer = (e) => {
+      const rect = el.getBoundingClientRect()
+      if (!rect.width || !rect.height) return
+      setSpot(`${((e.clientX - rect.left) / rect.width) * 100}%`, `${((e.clientY - rect.top) / rect.height) * 100}%`)
+    }
+    const onScroll = () => {
+      const rect = el.getBoundingClientRect()
+      const passed = Math.min(1, Math.max(0, -rect.top / (rect.height || 1)))
+      setSpot('68%', `${18 + passed * 50}%`)
+    }
+    el.addEventListener('pointermove', onPointer)
+    if (!fine) {
+      onScroll()
+      window.addEventListener('scroll', onScroll, { passive: true })
+    }
+    return () => {
+      el.removeEventListener('pointermove', onPointer)
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [motionOk])
 
   useEffect(() => {
     setPreviewNote(false)
@@ -126,7 +287,7 @@ export default function Home() {
     <>
       <div className="landing-wrap">
         <main className="main">
-          <section className="hero">
+          <section className={`hero${motionOk ? ' hero-live' : ''}`} ref={heroRef}>
             <HeroKicker lines={t.hero.kicker} />
             <div className="hero-mast">
               <figure className="hero-portrait">
@@ -188,6 +349,7 @@ export default function Home() {
             <h2 className="section-title">{t.selected.title}</h2>
             <p className="section-note">{t.selected.note}</p>
           </div>
+          <WorkShow projects={PICKS} t={t} />
           <div className="pick-list">
             {PICKS.map((project, index) => {
               const text = projectText(t, project)
