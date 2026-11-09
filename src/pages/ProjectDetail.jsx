@@ -78,14 +78,21 @@ function GallerySection({ project, isAdmin, onGalleryChange }) {
   function next() { setDirection('next'); setLightbox(i => (i + 1) % allImages.length) }
 
   useEffect(() => {
-    if (lightbox === null) return
+    if (lightbox === null) return undefined
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const close = document.querySelector('.gl-lb-close')
+    close?.focus()
     function onKey(e) {
       if (e.key === 'ArrowLeft') prev()
       if (e.key === 'ArrowRight') next()
       if (e.key === 'Escape') setLightbox(null)
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = previous
+      window.removeEventListener('keydown', onKey)
+    }
   }, [lightbox, allImages.length])
 
   return (
@@ -119,7 +126,7 @@ function GallerySection({ project, isAdmin, onGalleryChange }) {
         <div className="gl-lb" onClick={() => setLightbox(null)}>
           <button type="button" className="gl-lb-arrow gl-lb-arrow--prev" aria-label="Previous" onClick={e => { e.stopPropagation(); prev() }}>‹</button>
           <div className="gl-lb-img-wrap" onClick={e => e.stopPropagation()}>
-            <img key={lightbox} src={allImages[lightbox].image} alt="" className={`gl-lb-img gl-lb-img--${direction}`} />
+            <img key={lightbox} src={allImages[lightbox].image} alt={project.title || ''} className={`gl-lb-img gl-lb-img--${direction}`} />
             <button type="button" className="gl-lb-close" aria-label="Close" onClick={() => setLightbox(null)}>×</button>
           </div>
           <button type="button" className="gl-lb-arrow gl-lb-arrow--next" aria-label="Next" onClick={e => { e.stopPropagation(); next() }}>›</button>

@@ -68,8 +68,7 @@ function ProjectCard({ project, viewLabel }) {
       </div>
       <div className="project-bin-body">
         <div className="project-bin-meta">
-          <span className="project-bin-category">{text.category}</span>
-          {project.year ? <span className="project-bin-year">{project.year}</span> : null}
+          <span className="project-bin-category">{text.category}{project.year ? ` · ${project.year}` : ''}</span>
         </div>
         <h3 className="project-bin-title">{project.title}</h3>
         <p className="project-bin-desc">{text.description}</p>
