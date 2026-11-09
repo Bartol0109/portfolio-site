@@ -49,7 +49,13 @@ test('public navigation has no admin link and the login route stays', () => {
   assert.doesNotMatch(header, /t\.nav\.admin/)
   assert.doesNotMatch(header, /to="\/admin/)
   assert.match(header, /navigate\('\/admin\/login'\)/)
+  assert.match(header, /aria-controls="site-nav"/)
+  assert.match(header, /aria-expanded=/)
+  assert.match(header, /Profilna\.jpg/)
   assert.match(app, /path="admin\/login"/)
+  const css = read('src/index.css')
+  assert.match(css, /translateX\(-105%\)/)
+  assert.match(css, /prefers-reduced-motion: reduce/)
 })
 
 test('hero no longer mounts the orbit or the play watermark', () => {
@@ -73,6 +79,16 @@ test('Croatian and English expose the same copy structure', () => {
   assert.equal(translations.hr.hero.desc, 'Dostupan za posao.')
   assert.equal(translations.en.hero.statementWord, 'work')
   assert.equal(translations.hr.hero.statementWord, 'posao')
+  assert.equal(translations.en.hero.work, 'See the work')
+  assert.equal(translations.hr.hero.work, 'Pogledaj radove')
+  assert.deepEqual(translations.en.hero.kicker, [
+    'All of my work in one place.',
+    'This is an interactive CV.',
+  ])
+  assert.deepEqual(translations.hr.hero.kicker, [
+    'Sav moj rad na jednom mjestu.',
+    'Ovo je interaktivni CV.',
+  ])
   const headlines = [
     translations.en.hero.desc,
     translations.hr.hero.desc,

@@ -35,6 +35,10 @@ export const translations = {
       contact: 'Say hello',
       cv: 'Download CV',
       findMe: 'Also on',
+      kicker: [
+        'All of my work in one place.',
+        'This is an interactive CV.',
+      ],
     },
     stats: [
       { num: 'Algebra University', label: '' },
@@ -199,10 +203,14 @@ export const translations = {
       statementWord: 'posao',
       statementEnd: '.',
       skillsLabel: 'Vještine',
-      work: 'Vidi radove',
+      work: 'Pogledaj radove',
       contact: 'Javi se',
       cv: 'Preuzmi CV',
       findMe: 'I na',
+      kicker: [
+        'Sav moj rad na jednom mjestu.',
+        'Ovo je interaktivni CV.',
+      ],
     },
     stats: [
       { num: 'Algebra University', label: '' },
