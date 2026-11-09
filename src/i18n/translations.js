@@ -184,7 +184,7 @@ export const translations = {
       back: 'Back',
     },
     admin: {
-      title: 'Studio',
+      title: 'Admin panel',
       lead: 'Works stored on the server.',
       loading: 'Loading works.',
       empty: 'No works in the database yet.',
@@ -414,7 +414,7 @@ export const translations = {
       back: 'Natrag',
     },
     admin: {
-      title: 'Studio',
+      title: 'Admin panel',
       lead: 'Radovi spremljeni na serveru.',
       loading: 'Učitavam radove.',
       empty: 'U bazi još nema radova.',
