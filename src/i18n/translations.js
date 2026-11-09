@@ -48,7 +48,7 @@ export const translations = {
     ],
     selected: {
       title: 'Selected work',
-      note: 'Projects from my degree, plus this site.',
+      note: 'Projects from my degree.',
       all: 'See all',
       show: 'Selected projects',
       prev: 'Previous project',
@@ -225,7 +225,7 @@ export const translations = {
     ],
     selected: {
       title: 'Odabrani radovi',
-      note: 'Zadaci s fakulteta, i ova stranica.',
+      note: 'Zadaci s fakulteta.',
       all: 'Svi radovi',
       show: 'Odabrani radovi',
       prev: 'Prethodni rad',
