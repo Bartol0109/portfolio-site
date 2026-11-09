@@ -237,6 +237,17 @@ if (isset($_FILES["image"]) && is_array($_FILES["image"])) {
   }
 }
 
+$coverGalleryId = (int)($_POST["cover_gallery_id"] ?? 0);
+if ($newImagePath === null && $id > 0 && $coverGalleryId > 0) {
+  $coverStmt = $pdo->prepare("SELECT image_path FROM portfolio_gallery WHERE id = ? AND portfolio_id = ? LIMIT 1");
+  $coverStmt->execute([$coverGalleryId, $id]);
+  $coverRow = $coverStmt->fetch();
+  $coverPath = (string)($coverRow["image_path"] ?? "");
+  if ($coverPath !== "" && strncmp($coverPath, "/portfolio-uploads/", 19) === 0) {
+    $newImagePath = $coverPath;
+  }
+}
+
 // image_path i project_url su NOT NULL u bazi — uvijek string (prazan ako nema slike / linka)
 $imagePath = "";
 $body = $description;

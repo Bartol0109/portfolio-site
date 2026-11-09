@@ -105,7 +105,7 @@ function GallerySection({ project, isAdmin, onGalleryChange }) {
             )}
           </div>
         ))}
-        {isAdmin && gallery.length < 5 && (
+        {isAdmin && gallery.length < 20 && (
           <label className={`gallery-thumb-add${uploading ? ' gallery-thumb-add--loading' : ''}`}>
             <span>{uploading ? '…' : '+'}</span>
             <input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadImage} disabled={uploading} style={{ display: 'none' }} />

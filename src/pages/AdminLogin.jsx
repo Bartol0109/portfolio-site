@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useLanguage } from '../i18n/LanguageContext'
 
 export default function AdminLogin() {
@@ -52,6 +52,10 @@ export default function AdminLogin() {
 
   return (
     <main className={`auth-main${entered ? ' is-in' : ''}`}>
+      <div className="auth-bar">
+        <Link className="auth-back" to="/">{t.auth.back}</Link>
+      </div>
+      <div className="auth-stage">
       <div className={`auth-card${shake ? ' is-shake' : ''}${entered ? ' is-in' : ''}`}>
         <figure className="auth-portrait">
           <img src="/slike/Profilna.jpg" alt="" />
@@ -84,6 +88,7 @@ export default function AdminLogin() {
             {submitting ? t.auth.submitting : t.auth.submit}
           </button>
         </form>
+      </div>
       </div>
     </main>
   )
