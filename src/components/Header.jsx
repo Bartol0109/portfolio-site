@@ -300,14 +300,24 @@ export default function Header() {
               {t.nav.logout}
             </button>
           ) : null}
-          <button
-            type="button"
-            className="mobile-menu-link mobile-menu-link--button nav-lang"
-            onClick={() => { toggle(); closeMenu() }}
-            aria-label={t.nav.switchLang}
-          >
-            {otherLang}
-          </button>
+          <div className="mobile-menu-langs">
+            <button
+              type="button"
+              className={`mobile-menu-lang${lang === 'hr' ? ' is-active' : ''}`}
+              aria-pressed={lang === 'hr'}
+              onClick={() => { if (lang !== 'hr') { toggle(); closeMenu() } }}
+            >
+              HR
+            </button>
+            <button
+              type="button"
+              className={`mobile-menu-lang${lang === 'en' ? ' is-active' : ''}`}
+              aria-pressed={lang === 'en'}
+              onClick={() => { if (lang !== 'en') { toggle(); closeMenu() } }}
+            >
+              EN
+            </button>
+          </div>
         </div>
       </div>
     </header>
