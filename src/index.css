@@ -325,10 +325,19 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
 .section-title { margin: 0 0 0.6rem; font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 520; letter-spacing: -0.05em; line-height: 0.95; }
 .section-note, .about-deck-hint, .portfolio-intro, .updates-subtitle, .contact-intro { color: var(--muted); margin: 0; max-width: 36rem; }
 .section-head { margin-bottom: 1.2rem; }
-.show { margin: 0 0 2.4rem; }
+.page-section.page-section--work {
+  width: min(920px, calc(100% - 40px));
+}
+.show {
+  margin: 0 0 2rem;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #101010;
+}
 .show-frame {
   display: grid;
-  background: #141414;
+  background: transparent;
 }
 .show-slide {
   grid-area: 1 / 1;
@@ -342,16 +351,24 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
   transition: opacity 0.5s ease;
 }
 .show-slide.is-on { opacity: 1; z-index: 1; pointer-events: auto; }
-.show-photo { aspect-ratio: 16 / 9; overflow: hidden; background: #141414; }
+.show-photo {
+  width: min(100%, 746px);
+  margin-inline: auto;
+  aspect-ratio: 16 / 9;
+  max-height: 420px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #141414;
+}
 .show-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .show-copy {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.9rem 0.1rem 0.15rem;
+  gap: 0.35rem;
+  padding: 16px 4px 0;
 }
 .show-meta { color: var(--accent); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; }
-.show-title { font-size: clamp(1.45rem, 2.4vw, 2.2rem); letter-spacing: -0.04em; font-weight: 540; }
+.show-title { font-size: clamp(1.35rem, 2.2vw, 2rem); letter-spacing: -0.04em; font-weight: 540; }
 .show-tag {
   color: #e4e4de;
   max-width: 38rem;
@@ -365,7 +382,8 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
-  margin-top: 0.55rem;
+  margin-top: 12px;
+  padding: 0 2px;
 }
 .show-arrow {
   width: 44px; height: 44px; flex: none;
@@ -396,8 +414,8 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
 
 .pick-list { display: flex; flex-direction: column; }
 .pick {
-  position: relative; display: grid; grid-template-columns: 3rem minmax(0, 1fr) 180px;
-  gap: 1rem; align-items: center; padding: 1.15rem 0; text-decoration: none;
+  position: relative; display: grid; grid-template-columns: 3rem minmax(0, 1fr) 160px;
+  gap: 1rem; align-items: center; padding: 1.15rem 8px; text-decoration: none;
   border-top: 1px solid var(--line);
 }
 .pick-list .pick:last-child { border-bottom: 1px solid var(--line); }
@@ -407,7 +425,7 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
 .pick-title { font-size: clamp(1.4rem, 2vw, 2rem); letter-spacing: -0.04em; font-weight: 540; }
 .pick-desc { color: #c8c8c2; max-width: 40rem; }
 .pick-shot {
-  width: 180px; aspect-ratio: 16/10; overflow: hidden; background: #161616;
+  width: 160px; aspect-ratio: 16/10; overflow: hidden; border-radius: 8px; background: #161616;
   opacity: 0; transform: translateY(8px);
   transition: opacity .35s var(--ease), transform .45s var(--ease);
 }
@@ -687,6 +705,10 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
   .picked-slot { grid-template-columns: 32px 72px minmax(0, 1fr) auto; }
   .picked-actions { grid-column: auto; }
 }
+@media (min-width: 760px) {
+  .show { padding: 28px; }
+  .page-section.page-section--work { width: min(920px, calc(100% - 64px)); }
+}
 @media (max-width: 767px) {
   .studio-head {
     grid-template-columns: 1fr 1fr;
@@ -796,7 +818,12 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
     height: auto;
     position: fixed; z-index: 130; left: 0; top: 50%;
     transform: translateY(-50%);
+    transition: transform 360ms ease-out;
   }
+  .header.is-nav-open .nav-edge {
+    transform: translateY(-50%) translateX(248px);
+  }
+  .header.is-nav-open .nav-edge-plate { border-left-width: 1px; }
   .nav-edge-plate { margin-right: 0; }
   .nav-edge-label {
     display: block;
