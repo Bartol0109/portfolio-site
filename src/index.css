@@ -162,7 +162,6 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
   display: flex; align-items: center; width: 100%; min-height: 64px; box-sizing: border-box;
   padding: 0.2rem 1.25rem; font-size: clamp(2.25rem, 10vw, 3.25rem); font-weight: 520;
   letter-spacing: -0.05em; line-height: 1;
-  border-bottom: 1px solid var(--line);
 }
 .mobile-menu-link:hover, .mobile-menu-link:focus-visible, .mobile-menu-link[aria-current="page"] { color: var(--accent); }
 .mobile-menu-link.nav-lang,
@@ -170,7 +169,6 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
   width: auto; min-width: 44px; min-height: 44px; align-self: flex-start;
   margin: 0.9rem 1.25rem 0; padding: 0 0.85rem;
   font-size: 0.95rem; font-weight: 700; letter-spacing: 0.08em;
-  border-bottom: 0;
 }
 .mobile-menu-link--quiet { color: var(--muted); font-weight: 520; letter-spacing: -0.02em; }
 
