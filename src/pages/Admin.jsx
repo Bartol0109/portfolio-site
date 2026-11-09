@@ -355,7 +355,7 @@ export default function Admin() {
                       <span className="picked-actions">
                         <button type="button" onClick={() => movePick(index, index - 1)} disabled={index === 0} aria-label={t.admin.moveUp}>↑</button>
                         <button type="button" onClick={() => movePick(index, index + 1)} disabled={index === picks.length - 1} aria-label={t.admin.moveDown}>↓</button>
-                        <button type="button" onClick={() => setPicks((current) => current.filter((entry) => entry.id !== item.id))}>{t.admin.removePick}</button>
+                        <button type="button" className="is-danger" onClick={() => setPicks((current) => current.filter((entry) => entry.id !== item.id))}>{t.admin.removePick}</button>
                       </span>
                     </>
                   ) : <span className="studio-note">{t.admin.slotEmpty}</span>}
