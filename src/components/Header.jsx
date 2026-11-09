@@ -229,12 +229,12 @@ export default function Header() {
           </Link>
           <div className="header-end">
             <nav className="nav" aria-label={t.nav.home}>
-              <Link to="/#about" className="nav-link nav-index">{t.nav.about}</Link>
-              <Link to="/#contact" className="nav-link nav-index">{t.nav.contact}</Link>
-              <Link to="/blog" className="nav-link nav-index">{t.nav.blog}</Link>
+              <Link to="/#about" className="nav-link">{t.nav.about}</Link>
+              <Link to="/#contact" className="nav-link">{t.nav.contact}</Link>
+              <Link to="/blog" className="nav-link">{t.nav.blog}</Link>
               <Link
                 to="/portfolio"
-                className={`nav-link nav-index${isPortfolio ? ' nav-link--active' : ''}`}
+                className={`nav-link${isPortfolio ? ' nav-link--active' : ''}`}
                 aria-current={isPortfolio ? 'page' : undefined}
               >
                 {t.nav.portfolio}

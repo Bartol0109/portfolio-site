@@ -138,13 +138,7 @@ a { color: inherit; }
   text-decoration: none; background: none; border: 0; cursor: pointer; color: var(--muted);
   min-height: 44px; padding: 0.3rem 0.7rem; display: inline-flex; align-items: center; gap: 0.55rem; font-size: 0.92rem;
 }
-.nav-link:hover, .nav-link--active { color: var(--ink); }
-.nav-index::before {
-  content: counter(item, decimal-leading-zero);
-  counter-increment: item;
-  color: var(--accent); font-size: 0.68rem; letter-spacing: 0.08em;
-}
-.nav { counter-reset: item; }
+.nav-link:hover, .nav-link:focus-visible, .nav-link--active { color: var(--accent); }
 .nav-lang { color: var(--ink); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; }
 .hamburger {
   display: none; width: 44px; height: 44px; border: 0; background: transparent; color: var(--ink); cursor: pointer;
@@ -165,7 +159,7 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
   background: none; border: 0; color: var(--ink); text-align: left; text-decoration: none; cursor: pointer;
   font-size: clamp(2.1rem, 9vw, 3.1rem); font-weight: 520; letter-spacing: -0.05em; line-height: 1.05; padding: 0.1rem 0;
 }
-.mobile-menu-link[aria-current="page"] { color: var(--accent); }
+.mobile-menu-link:hover, .mobile-menu-link:focus-visible, .mobile-menu-link[aria-current="page"] { color: var(--accent); }
 .mobile-menu-link--quiet { font-size: 1.05rem; color: var(--muted); margin-top: 0.8rem; }
 
 .main, .portfolio-main, .updates-main, .project-detail-main, .page-section, .hero-stats-bar, .footer-inner {
@@ -478,8 +472,8 @@ body.mobile-menu-open .hamburger-line:nth-child(3) { transform: translateY(-6.5p
     flex-direction: column; align-items: flex-start; justify-content: space-between;
     padding: 1.6rem 0 0.2rem;
   }
-  .nav-panel .nav { flex-direction: column; align-items: flex-start; width: 100%; }
-  .nav-panel .nav-link { width: 100%; padding-inline: 0; }
+  .nav-panel .nav { flex-direction: column; align-items: flex-start; width: 100%; gap: 0.35rem; }
+  .nav-panel .nav-link { width: 100%; padding: 0.15rem 0; }
   .nav-backdrop { display: block; }
   .header.is-nav-open .nav-backdrop { opacity: 1; pointer-events: auto; }
   .main, .portfolio-main, .updates-main, .project-detail-main, .page-section, .hero-stats-bar, .footer-inner {
