@@ -15,6 +15,14 @@ export default function Header() {
   const [holding, setHolding] = useState(false)
   const menuRef = useRef(null)
   const menuButtonRef = useRef(null)
+  const drawerRef = useRef(null)
+  const edgeRef = useRef(null)
+  const leaveTimer = useRef(0)
+  const blockHover = useRef(false)
+  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 980px)').matches)
+  const [pinned, setPinned] = useState(false)
+  const [hot, setHot] = useState(false)
+  const navOpen = isDesktop && (pinned || hot)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -83,7 +91,60 @@ export default function Header() {
     setHolding(false)
   }
 
-  useEffect(() => () => window.clearTimeout(hold.current.timer), [])
+  useEffect(() => () => {
+    window.clearTimeout(hold.current.timer)
+    window.clearTimeout(leaveTimer.current)
+  }, [])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 980px)')
+    const apply = () => setIsDesktop(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  const clearLeave = () => window.clearTimeout(leaveTimer.current)
+
+  const closeDesktopNav = () => {
+    clearLeave()
+    setPinned(false)
+    setHot(false)
+  }
+
+  const revealDesktopNav = () => {
+    if (!isDesktop || blockHover.current) return
+    clearLeave()
+    setHot(true)
+  }
+
+  const scheduleDesktopClose = () => {
+    if (!isDesktop) return
+    clearLeave()
+    leaveTimer.current = window.setTimeout(() => setHot(false), 280)
+  }
+
+  const toggleDesktopNav = () => {
+    if (navOpen) {
+      blockHover.current = true
+      closeDesktopNav()
+      return
+    }
+    blockHover.current = false
+    setPinned(true)
+  }
+
+  useEffect(() => {
+    if (!navOpen) return undefined
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return
+      blockHover.current = true
+      closeDesktopNav()
+      edgeRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [navOpen])
 
   const onLogoPointerDown = (e) => {
     if (e.button !== 0) return
@@ -120,59 +181,99 @@ export default function Header() {
   }
 
   return (
-    <header className={`header ${scrolled ? 'header--scrolled' : ''}`}>
+    <header className={`header${scrolled ? ' header--scrolled' : ''}${navOpen ? ' is-nav-open' : ''}`}>
       <a className="skip-link" href="#content">{t.nav.skip}</a>
-      <Link
-        to="/"
-        className={`logo${holding ? ' is-hold' : ''}`}
-        aria-label="Bartol Barać"
-        onClick={goLanding}
-        onPointerDown={onLogoPointerDown}
-        onPointerUp={clearHold}
-        onPointerLeave={clearHold}
-        onPointerCancel={clearHold}
+      <div
+        className="nav-drawer"
+        ref={drawerRef}
+        onPointerEnter={revealDesktopNav}
+        onPointerLeave={scheduleDesktopClose}
+        onFocusCapture={revealDesktopNav}
+        onBlurCapture={(e) => {
+          if (!drawerRef.current?.contains(e.relatedTarget)) scheduleDesktopClose()
+        }}
       >
-        <span className="logo-mark" aria-hidden="true">B</span>
-        <span className="logo-word">Bartol</span>
-      </Link>
-      <div className="header-end">
-        <nav className="nav" aria-label={t.nav.home}>
-          <Link to="/#about" className="nav-link nav-index">{t.nav.about}</Link>
-          <Link to="/#contact" className="nav-link nav-index">{t.nav.contact}</Link>
-          <Link to="/blog" className="nav-link nav-index">{t.nav.blog}</Link>
+        <button
+          type="button"
+          className="nav-edge"
+          ref={edgeRef}
+          hidden={!isDesktop}
+          aria-expanded={navOpen}
+          aria-controls="site-nav"
+          aria-label={navOpen ? t.nav.close : t.nav.menu}
+          onClick={toggleDesktopNav}
+          onPointerLeave={() => { blockHover.current = false }}
+          onBlur={() => { blockHover.current = false }}
+        >
+          <span className="nav-edge-plate">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+              <path d="M5 2.5 9.5 7 5 11.5" />
+            </svg>
+          </span>
+        </button>
+        <div id="site-nav" className="nav-panel" aria-hidden={isDesktop && !navOpen}>
           <Link
-            to="/portfolio"
-            className={`nav-link nav-index${isPortfolio ? ' nav-link--active' : ''}`}
-            aria-current={isPortfolio ? 'page' : undefined}
+            to="/"
+            className={`logo${holding ? ' is-hold' : ''}`}
+            aria-label="Bartol Barać"
+            onClick={goLanding}
+            onPointerDown={onLogoPointerDown}
+            onPointerUp={clearHold}
+            onPointerLeave={clearHold}
+            onPointerCancel={clearHold}
           >
-            {t.nav.portfolio}
+            <span className="logo-mark">
+              <img src="/slike/Profilna.jpg" alt="" />
+            </span>
+            <span className="logo-word">Bartol</span>
           </Link>
-          {isAdmin ? (
-            <button type="button" className="nav-link nav-link--button nav-link--quiet" onClick={logout}>{t.nav.logout}</button>
-          ) : null}
-        </nav>
-        <button
-          type="button"
-          className="nav-link nav-link--button nav-lang"
-          onClick={toggle}
-          aria-label={t.nav.switchLang}
-        >
-          {otherLang}
-        </button>
-        <button
-          type="button"
-          className="hamburger"
-          aria-label={menuOpen ? t.nav.close : t.nav.menu}
-          aria-expanded={menuOpen}
-          aria-controls="site-menu"
-          onClick={() => setMenuOpen((open) => !open)}
-          ref={menuButtonRef}
-        >
-          <span className="hamburger-line" />
-          <span className="hamburger-line" />
-          <span className="hamburger-line" />
-        </button>
+          <div className="header-end">
+            <nav className="nav" aria-label={t.nav.home}>
+              <Link to="/#about" className="nav-link">{t.nav.about}</Link>
+              <Link to="/#contact" className="nav-link">{t.nav.contact}</Link>
+              <Link to="/blog" className="nav-link">{t.nav.blog}</Link>
+              <Link
+                to="/portfolio"
+                className={`nav-link${isPortfolio ? ' nav-link--active' : ''}`}
+                aria-current={isPortfolio ? 'page' : undefined}
+              >
+                {t.nav.portfolio}
+              </Link>
+              {isAdmin ? (
+                <button type="button" className="nav-link nav-link--button nav-link--quiet" onClick={logout}>{t.nav.logout}</button>
+              ) : null}
+            </nav>
+            <button
+              type="button"
+              className="nav-link nav-link--button nav-lang"
+              onClick={toggle}
+              aria-label={t.nav.switchLang}
+            >
+              {otherLang}
+            </button>
+            <button
+              type="button"
+              className="hamburger"
+              aria-label={menuOpen ? t.nav.close : t.nav.menu}
+              aria-expanded={menuOpen}
+              aria-controls="site-menu"
+              onClick={() => setMenuOpen((open) => !open)}
+              ref={menuButtonRef}
+            >
+              <span className="hamburger-line" />
+              <span className="hamburger-line" />
+              <span className="hamburger-line" />
+            </button>
+          </div>
+        </div>
       </div>
+      <button
+        type="button"
+        className="nav-backdrop"
+        tabIndex={-1}
+        aria-hidden="true"
+        onClick={closeDesktopNav}
+      />
       <div
         id="site-menu"
         className={`mobile-menu${menuOpen ? ' is-open' : ''}`}
@@ -199,14 +300,24 @@ export default function Header() {
               {t.nav.logout}
             </button>
           ) : null}
-          <button
-            type="button"
-            className="mobile-menu-link mobile-menu-link--button nav-lang"
-            onClick={() => { toggle(); closeMenu() }}
-            aria-label={t.nav.switchLang}
-          >
-            {otherLang}
-          </button>
+          <div className="mobile-menu-langs">
+            <button
+              type="button"
+              className={`mobile-menu-lang${lang === 'hr' ? ' is-active' : ''}`}
+              aria-pressed={lang === 'hr'}
+              onClick={() => { if (lang !== 'hr') { toggle(); closeMenu() } }}
+            >
+              HR
+            </button>
+            <button
+              type="button"
+              className={`mobile-menu-lang${lang === 'en' ? ' is-active' : ''}`}
+              aria-pressed={lang === 'en'}
+              onClick={() => { if (lang !== 'en') { toggle(); closeMenu() } }}
+            >
+              EN
+            </button>
+          </div>
         </div>
       </div>
     </header>

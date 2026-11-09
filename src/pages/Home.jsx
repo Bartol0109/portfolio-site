@@ -44,6 +44,68 @@ const SOCIAL = [
   },
 ]
 
+function HeroKicker({ lines }) {
+  const [shown, setShown] = useState('')
+  const [reduce, setReduce] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const apply = () => setReduce(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  useEffect(() => {
+    if (reduce || lines.length === 0) return undefined
+    let line = 0
+    let count = 0
+    let deleting = false
+    let timer = 0
+    const tick = () => {
+      const full = lines[line]
+      if (!deleting) {
+        count += 1
+        setShown(full.slice(0, count))
+        if (count >= full.length) {
+          deleting = true
+          timer = window.setTimeout(tick, 1700)
+          return
+        }
+        timer = window.setTimeout(tick, 38)
+      } else {
+        count -= 1
+        setShown(full.slice(0, Math.max(count, 0)))
+        if (count <= 0) {
+          deleting = false
+          line = (line + 1) % lines.length
+          timer = window.setTimeout(tick, 260)
+          return
+        }
+        timer = window.setTimeout(tick, 18)
+      }
+    }
+    timer = window.setTimeout(tick, 280)
+    return () => window.clearTimeout(timer)
+  }, [lines, reduce])
+
+  return (
+    <p className="hero-kicker">
+      <span className="sr-only">{lines.join(' ')}</span>
+      {reduce ? (
+        <span className="hero-kicker-static">
+          {lines.map((line) => <span key={line}>{line}</span>)}
+        </span>
+      ) : (
+        <span className="hero-kicker-live" aria-hidden="true">
+          {shown}
+          <span className="hero-caret" />
+        </span>
+      )}
+    </p>
+  )
+}
+
 export default function Home() {
   const { t } = useLanguage()
   const preview = isDevPreview()
@@ -65,6 +127,7 @@ export default function Home() {
       <div className="landing-wrap">
         <main className="main">
           <section className="hero">
+            <HeroKicker lines={t.hero.kicker} />
             <div className="hero-mast">
               <figure className="hero-portrait">
                 <img src="/slike/Profilna.jpg" alt="" />
