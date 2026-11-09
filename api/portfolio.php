@@ -26,11 +26,19 @@ if ($method === "GET") {
   $pdo = require __DIR__ . "/db.php";
 
   try {
-    $stmt = $pdo->query("
-      SELECT id, category, title, body, tags, image_path, author, created_at
-      FROM portfolio_items
-      ORDER BY created_at DESC, id DESC
-    ");
+    try {
+      $stmt = $pdo->query("
+        SELECT id, category, title, body, tags, image_path, author, created_at, featured_order
+        FROM portfolio_items
+        ORDER BY created_at DESC, id DESC
+      ");
+    } catch (Throwable $orderMissing) {
+      $stmt = $pdo->query("
+        SELECT id, category, title, body, tags, image_path, author, created_at
+        FROM portfolio_items
+        ORDER BY created_at DESC, id DESC
+      ");
+    }
     $rows = $stmt->fetchAll();
 
     $ids = array_column($rows, "id");
@@ -73,8 +81,9 @@ if ($method === "GET") {
       "tags"        => $tags,
       "image"       => $img !== "" ? $img : null,
       "author"      => (string)($r["author"] ?? ""),
-      "gallery"     => $gallery[$pid] ?? [],
-      "links"       => $links[$pid] ?? [],
+      "gallery"        => $gallery[$pid] ?? [],
+      "links"          => $links[$pid] ?? [],
+      "featured_order" => isset($r["featured_order"]) && $r["featured_order"] !== null ? (int)$r["featured_order"] : null,
     ];
   }, $rows);
 
@@ -234,6 +243,17 @@ if (isset($_FILES["image"]) && is_array($_FILES["image"])) {
     }
 
     $newImagePath = "/portfolio-uploads/" . $fname;
+  }
+}
+
+$coverGalleryId = (int)($_POST["cover_gallery_id"] ?? 0);
+if ($newImagePath === null && $id > 0 && $coverGalleryId > 0) {
+  $coverStmt = $pdo->prepare("SELECT image_path FROM portfolio_gallery WHERE id = ? AND portfolio_id = ? LIMIT 1");
+  $coverStmt->execute([$coverGalleryId, $id]);
+  $coverRow = $coverStmt->fetch();
+  $coverPath = (string)($coverRow["image_path"] ?? "");
+  if ($coverPath !== "" && strncmp($coverPath, "/portfolio-uploads/", 19) === 0) {
+    $newImagePath = $coverPath;
   }
 }
 

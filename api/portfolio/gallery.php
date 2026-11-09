@@ -46,6 +46,28 @@ if ($method !== "POST") {
     exit;
 }
 
+$rawBody = file_get_contents("php://input");
+$json = json_decode($rawBody ?: "", true);
+if (is_array($json) && isset($json["order"]) && is_array($json["order"])) {
+    $portfolioId = (int)($json["portfolio_id"] ?? 0);
+    if ($portfolioId <= 0) {
+        http_response_code(400);
+        echo json_encode(["error" => "Missing portfolio_id"]);
+        exit;
+    }
+    try {
+        $stmt = $pdo->prepare("UPDATE portfolio_gallery SET sort_order = ? WHERE id = ? AND portfolio_id = ?");
+        foreach (array_values($json["order"]) as $index => $galleryId) {
+            $stmt->execute([(int)$index, (int)$galleryId, $portfolioId]);
+        }
+        echo json_encode(["ok" => true]);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        echo json_encode(["error" => "Could not reorder images"]);
+    }
+    exit;
+}
+
 $portfolioId = (int)($_POST["portfolio_id"] ?? 0);
 if ($portfolioId <= 0) {
     http_response_code(400);
@@ -55,9 +77,9 @@ if ($portfolioId <= 0) {
 
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM portfolio_gallery WHERE portfolio_id = ?");
 $stmt->execute([$portfolioId]);
-if ((int)$stmt->fetchColumn() >= 5) {
+if ((int)$stmt->fetchColumn() >= 20) {
     http_response_code(400);
-    echo json_encode(["error" => "Maximum 5 gallery images allowed"]);
+    echo json_encode(["error" => "Maximum 20 gallery images allowed"]);
     exit;
 }
 

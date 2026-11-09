@@ -9,13 +9,25 @@ export default function Layout() {
   const location = useLocation()
   const { t } = useLanguage()
   const isPortfolio = location.pathname.startsWith('/portfolio')
+  const isPrivate = location.pathname.startsWith('/admin')
 
   useEffect(() => {
-    document.title = isPortfolio ? t.titles.portfolio : t.titles.welcome
+    document.title = isPrivate ? `${t.admin.title} · Bartol Barać` : (isPortfolio ? t.titles.portfolio : t.titles.welcome)
     const meta = document.querySelector('meta[name="description"]')
     if (meta) meta.setAttribute('content', t.titles.description)
     document.body.classList.toggle('portfolio-page', isPortfolio)
-  }, [location.pathname, isPortfolio, t])
+    let robots = document.querySelector('meta[name="robots"]')
+    if (isPrivate) {
+      if (!robots) {
+        robots = document.createElement('meta')
+        robots.setAttribute('name', 'robots')
+        document.head.appendChild(robots)
+      }
+      robots.setAttribute('content', 'noindex, nofollow')
+    } else if (robots) {
+      robots.remove()
+    }
+  }, [location.pathname, isPortfolio, isPrivate, t])
 
   useEffect(() => {
     requestAnimationFrame(() => {

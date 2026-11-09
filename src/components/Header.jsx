@@ -200,7 +200,7 @@ export default function Header() {
           hidden={!isDesktop}
           aria-expanded={navOpen}
           aria-controls="site-nav"
-          aria-label={navOpen ? t.nav.close : t.nav.menu}
+          aria-label={navOpen ? t.nav.close : t.nav.navigation}
           onClick={toggleDesktopNav}
           onPointerLeave={() => { blockHover.current = false }}
           onBlur={() => { blockHover.current = false }}
@@ -210,6 +210,7 @@ export default function Header() {
               <path d="M5 2.5 9.5 7 5 11.5" />
             </svg>
           </span>
+          <span className="nav-edge-label" aria-hidden="true">{t.nav.navigation}</span>
         </button>
         <div id="site-nav" className="nav-panel" aria-hidden={isDesktop && !navOpen}>
           <Link
