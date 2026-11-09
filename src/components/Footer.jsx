@@ -16,6 +16,10 @@ export default function Footer() {
           <Link to="/portfolio">{t.footer.portfolio}</Link>
         </nav>
       </div>
+      <p className="footer-studio">
+        {t.footer.studioLead}{' '}
+        <Link to="/admin/login" rel="nofollow">{t.footer.studioLink}</Link>
+      </p>
     </footer>
   )
 }

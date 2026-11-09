@@ -7,6 +7,7 @@ const Portfolio = lazy(() => import('./pages/Portfolio'))
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'))
 const Blog = lazy(() => import('./pages/Blog'))
 const AdminLogin = lazy(() => import('./pages/AdminLogin'))
+const Admin = lazy(() => import('./pages/Admin'))
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="portfolio/:id" element={<ProjectDetail />} />
             <Route path="blog" element={<Blog />} />
             <Route path="admin/login" element={<AdminLogin />} />
+            <Route path="admin" element={<Admin />} />
           </Route>
         </Routes>
       </Suspense>

@@ -5,13 +5,8 @@ import Sidebar from '../components/Sidebar'
 import { useLanguage } from '../i18n/LanguageContext'
 import { projectText } from '../i18n/translations'
 import { contactFormAction, isDevPreview } from '../lib/devGuard'
+import { FALLBACK_PICKS, loadPortfolioItems, picksFromItems } from '../lib/portfolioData'
 import { useReveal } from '../lib/useReveal'
-
-const PICKS = [
-  { id: 'p1', title: 'Construction Company Website', year: '2026', image: '/slike/Portfolio1.jpeg', category: 'Web Design' },
-  { id: 'p4', title: 'Full-stack Application', year: '2025', image: '/slike/Portfolio4.jpeg', category: 'College Project' },
-  { id: 'p6', title: '2D Game Development', year: '2026', image: '/slike/Portfolio6.png', category: 'Game Development' },
-]
 
 const SOCIAL = [
   {
@@ -130,7 +125,7 @@ function WorkShow({ projects, t }) {
                 <img src={project.image} alt="" />
               </span>
               <span className="show-copy">
-                <span className="show-meta">{text.category} · {project.year}</span>
+                <span className="show-meta">{text.category}{project.year ? ` · ${project.year}` : ''}</span>
                 <span className="show-title">{project.title}</span>
                 <span className="show-tag">{text.description}</span>
               </span>
@@ -234,7 +229,17 @@ export default function Home() {
   const [previewNote, setPreviewNote] = useState(false)
   const heroRef = useRef(null)
   const [motionOk, setMotionOk] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [picks, setPicks] = useState(FALLBACK_PICKS)
   useReveal(t.about.title)
+
+  useEffect(() => {
+    let alive = true
+    loadPortfolioItems().then((items) => {
+      if (!alive || !items || items.length === 0) return
+      setPicks(picksFromItems(items))
+    })
+    return () => { alive = false }
+  }, [])
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -349,15 +354,15 @@ export default function Home() {
             <h2 className="section-title">{t.selected.title}</h2>
             <p className="section-note">{t.selected.note}</p>
           </div>
-          <WorkShow projects={PICKS} t={t} />
+          <WorkShow projects={picks} t={t} />
           <div className="pick-list">
-            {PICKS.map((project, index) => {
+            {picks.map((project, index) => {
               const text = projectText(t, project)
               return (
                 <Link key={project.id} to={`/portfolio/${project.id}`} state={{ project }} className="pick">
                   <span className="pick-index">0{index + 1}</span>
                   <span className="pick-copy">
-                    <span className="pick-meta">{text.category} · {project.year}</span>
+                    <span className="pick-meta">{text.category}{project.year ? ` · ${project.year}` : ''}</span>
                     <span className="pick-title">{project.title}</span>
                     <span className="pick-desc">{text.description}</span>
                   </span>

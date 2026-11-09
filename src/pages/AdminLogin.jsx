@@ -9,13 +9,15 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [shake, setShake] = useState(false)
+  const [entered, setEntered] = useState(false)
 
   useEffect(() => {
     let alive = true
     fetch('/api/admin/me.php', { credentials: 'include' })
       .then((res) => res.json().catch(() => ({})))
       .then((data) => {
-        if (alive && data?.ok) nav('/blog', { replace: true })
+        if (alive && data?.ok) nav('/admin', { replace: true })
       })
       .catch(() => {})
     return () => { alive = false }
@@ -36,19 +38,28 @@ export default function AdminLogin() {
       if (!res.ok) {
         throw new Error(data?.blocked ? t.auth.blocked : t.auth.fail)
       }
-      nav('/blog')
+      setEntered(true)
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      window.setTimeout(() => nav('/admin', { replace: true }), reduce ? 80 : 900)
     } catch (err) {
       setError(err?.message === t.auth.blocked ? t.auth.blocked : t.auth.fail)
+      setShake(true)
+      window.setTimeout(() => setShake(false), 480)
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <main className="auth-main">
-      <div className="auth-card">
+    <main className={`auth-main${entered ? ' is-in' : ''}`}>
+      <div className={`auth-card${shake ? ' is-shake' : ''}${entered ? ' is-in' : ''}`}>
+        <figure className="auth-portrait">
+          <img src="/slike/Profilna.jpg" alt="" />
+        </figure>
+        <p className="auth-kicker">{t.auth.hint}</p>
         <p className="auth-wordmark">Bartol Barać</p>
-        <form className="auth-form" onSubmit={onSubmit}>
+        {entered ? <p className="auth-ok" role="status">{t.auth.ok}</p> : null}
+        <form className="auth-form" onSubmit={onSubmit} hidden={entered}>
           <label className="auth-label" htmlFor="studio-user">{t.auth.user}</label>
           <input
             id="studio-user"
@@ -68,7 +79,7 @@ export default function AdminLogin() {
             autoComplete="current-password"
             required
           />
-          {error ? <div className="auth-error">{error}</div> : null}
+          {error ? <div className="auth-error" role="alert">{error}</div> : null}
           <button className="auth-button" type="submit" disabled={submitting}>
             {submitting ? t.auth.submitting : t.auth.submit}
           </button>
