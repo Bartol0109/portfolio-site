@@ -18,7 +18,7 @@ export function normalizeItem(item) {
     gallery: item.gallery || [],
     links: item.links || [],
     year: item.year || '',
-    featured: tags.some((tag) => String(tag).toLowerCase() === 'featured'),
+    featuredOrder: item.featured_order == null || item.featured_order === '' ? null : Number(item.featured_order),
   }
 }
 
@@ -36,9 +36,10 @@ export async function loadPortfolioItems() {
 
 export function picksFromItems(items) {
   if (!items || items.length === 0) return FALLBACK_PICKS
-  const featured = items.filter((item) => item.featured)
-  return (featured.length ? featured : items.slice(0, 3)).map((item) => ({
-    ...item,
-    image: item.image || '',
-  }))
+  const ranked = items
+    .filter((item) => Number.isFinite(item.featuredOrder) && item.featuredOrder > 0)
+    .sort((a, b) => a.featuredOrder - b.featuredOrder)
+    .slice(0, 5)
+  const chosen = ranked.length ? ranked : items.slice(0, 3)
+  return chosen.map((item) => ({ ...item, image: item.image || '' }))
 }

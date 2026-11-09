@@ -26,11 +26,19 @@ if ($method === "GET") {
   $pdo = require __DIR__ . "/db.php";
 
   try {
-    $stmt = $pdo->query("
-      SELECT id, category, title, body, tags, image_path, author, created_at
-      FROM portfolio_items
-      ORDER BY created_at DESC, id DESC
-    ");
+    try {
+      $stmt = $pdo->query("
+        SELECT id, category, title, body, tags, image_path, author, created_at, featured_order
+        FROM portfolio_items
+        ORDER BY created_at DESC, id DESC
+      ");
+    } catch (Throwable $orderMissing) {
+      $stmt = $pdo->query("
+        SELECT id, category, title, body, tags, image_path, author, created_at
+        FROM portfolio_items
+        ORDER BY created_at DESC, id DESC
+      ");
+    }
     $rows = $stmt->fetchAll();
 
     $ids = array_column($rows, "id");
@@ -73,8 +81,9 @@ if ($method === "GET") {
       "tags"        => $tags,
       "image"       => $img !== "" ? $img : null,
       "author"      => (string)($r["author"] ?? ""),
-      "gallery"     => $gallery[$pid] ?? [],
-      "links"       => $links[$pid] ?? [],
+      "gallery"        => $gallery[$pid] ?? [],
+      "links"          => $links[$pid] ?? [],
+      "featured_order" => isset($r["featured_order"]) && $r["featured_order"] !== null ? (int)$r["featured_order"] : null,
     ];
   }, $rows);
 

@@ -10,8 +10,7 @@ let photoSeq = 1
 const nextKey = () => { photoSeq += 1; return `ph-${photoSeq}` }
 
 function tagsFor(draft) {
-  const rest = (draft.tags || []).filter((tag) => String(tag).toLowerCase() !== 'featured')
-  return (draft.featured ? ['featured', ...rest] : rest).join(', ')
+  return (draft.tags || []).join(', ')
 }
 
 function uploadRequest(url, body, onProgress) {
@@ -65,6 +64,9 @@ export default function Admin() {
   const [linkType, setLinkType] = useState(LINK_TYPES[0])
   const [linkUrl, setLinkUrl] = useState('')
   const [showAll, setShowAll] = useState(false)
+  const [tab, setTab] = useState('works')
+  const [picks, setPicks] = useState([])
+  const pickDrag = useRef(null)
   const dragFrom = useRef(null)
 
   const load = useCallback(async () => {
@@ -83,8 +85,11 @@ export default function Admin() {
           nav('/admin/login', { replace: true })
           return
         }
-        await load()
-        if (alive) setReady(true)
+        const list = await load()
+        if (alive) {
+          setPicks(list.filter((item) => Number.isFinite(item.featuredOrder) && item.featuredOrder > 0).sort((a, b) => a.featuredOrder - b.featuredOrder))
+          setReady(true)
+        }
       })
       .catch(() => { if (alive) nav('/admin/login', { replace: true }) })
     return () => { alive = false }
@@ -260,6 +265,43 @@ export default function Admin() {
     }
   }
 
+  function addPick(item) {
+    setPicks((current) => (current.length >= 5 || current.some((entry) => entry.id === item.id) ? current : [...current, item]))
+  }
+
+  function movePick(from, to) {
+    if (to < 0 || to >= picks.length || from === to) return
+    setPicks((current) => {
+      const next = [...current]
+      const [item] = next.splice(from, 1)
+      next.splice(to, 0, item)
+      return next
+    })
+  }
+
+  async function saveOrder() {
+    setBusy(true)
+    setError('')
+    try {
+      const res = await fetch('/api/admin/featured.php', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: picks.map((item) => item.id) }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error || t.auth.fail)
+      setNotice(t.admin.orderSaved)
+      const list = await load()
+      setPicks(list.filter((item) => Number.isFinite(item.featuredOrder) && item.featuredOrder > 0).sort((a, b) => a.featuredOrder - b.featuredOrder))
+    } catch (err) {
+      const message = err?.message || t.auth.fail
+      setError(message.includes('featured_order') ? t.admin.migrate : message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function logout() {
     await fetch('/api/admin/logout.php', { method: 'POST', credentials: 'include' }).catch(() => {})
     nav('/')
@@ -285,8 +327,66 @@ export default function Admin() {
       </header>
       {notice ? <p className="studio-toast" role="status">{notice}</p> : null}
       {error ? <p className="auth-error" role="alert">{error}</p> : null}
+      <div className="studio-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={tab === 'works'} className={tab === 'works' ? 'is-on' : ''} onClick={() => setTab('works')}>{t.admin.worksTab}</button>
+        <button type="button" role="tab" aria-selected={tab === 'selected'} className={tab === 'selected' ? 'is-on' : ''} onClick={() => setTab('selected')}>{t.admin.selectedTab}</button>
+      </div>
 
-      {draft ? (
+      {tab === 'selected' ? (
+        <section className="picked" aria-label={t.admin.selectedTab}>
+          <p className="studio-note">{t.admin.selectedLead}</p>
+          <ol className="picked-slots">
+            {Array.from({ length: 5 }, (_, index) => {
+              const item = picks[index]
+              return (
+                <li
+                  key={item ? item.id : `empty-${index}`}
+                  className={item ? 'picked-slot' : 'picked-slot is-empty'}
+                  draggable={Boolean(item)}
+                  onDragStart={() => { pickDrag.current = index }}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => { if (item) movePick(pickDrag.current, index); pickDrag.current = null }}
+                >
+                  <span className="picked-num">{index + 1}</span>
+                  {item ? (
+                    <>
+                      {item.image ? <img src={item.image} alt="" /> : <span className="studio-item-empty" />}
+                      <span className="picked-title">{item.title}</span>
+                      <span className="picked-actions">
+                        <button type="button" onClick={() => movePick(index, index - 1)} disabled={index === 0} aria-label={t.admin.moveUp}>↑</button>
+                        <button type="button" onClick={() => movePick(index, index + 1)} disabled={index === picks.length - 1} aria-label={t.admin.moveDown}>↓</button>
+                        <button type="button" onClick={() => setPicks((current) => current.filter((entry) => entry.id !== item.id))}>{t.admin.removePick}</button>
+                      </span>
+                    </>
+                  ) : <span className="studio-note">{t.admin.slotEmpty}</span>}
+                </li>
+              )
+            })}
+          </ol>
+          <button type="button" className="cta cta--primary" onClick={saveOrder} disabled={busy}>{busy ? t.admin.saving : t.admin.saveOrder}</button>
+          <ul className="studio-items">
+            {items.map((item) => {
+              const chosen = picks.some((entry) => entry.id === item.id)
+              const full = picks.length >= 5
+              return (
+                <li key={item.id} className="studio-item">
+                  {item.image ? <img src={item.image} alt="" /> : <span className="studio-item-empty" />}
+                  <div>
+                    <p className="studio-item-title">{item.title}</p>
+                    <p className="studio-item-meta">{item.category}</p>
+                  </div>
+                  <button type="button" className="studio-text" disabled={chosen || full} onClick={() => addPick(item)}>
+                    {chosen ? t.admin.added : (full ? t.admin.full : t.admin.addTop)}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+          {items.length === 0 ? <p className="studio-empty">{t.admin.empty}</p> : null}
+        </section>
+      ) : null}
+
+      {tab === 'works' && draft ? (
         <form
           className="composer"
           onSubmit={publish}
@@ -350,10 +450,6 @@ export default function Admin() {
               <button key={category} type="button" className={draft.category === category ? 'is-on' : ''} aria-pressed={draft.category === category} onClick={() => setDraft({ ...draft, category })}>{category}</button>
             ))}
           </div>
-          <label className="studio-check">
-            <input type="checkbox" checked={draft.featured} onChange={(event) => setDraft({ ...draft, featured: event.target.checked })} />
-            {t.admin.featured}
-          </label>
           <button type="button" className="composer-links-toggle" aria-expanded={linksOpen} onClick={() => setLinksOpen((open) => !open)}>{t.admin.linksToggle}</button>
           {linksOpen ? (
             <div className="composer-links">
@@ -376,19 +472,20 @@ export default function Admin() {
             <button type="button" className="studio-text" onClick={() => setDraft(null)}>{t.admin.cancel}</button>
           </div>
         </form>
-      ) : (
+      ) : null}
+      {tab === 'works' && !draft ? (
         <button type="button" className="composer-launch" onClick={openNew}>{t.admin.drop}</button>
-      )}
+      ) : null}
 
-      <section className="studio-list" aria-label={t.admin.title}>
-        {items.length === 0 ? <p className="studio-note">{t.admin.empty}</p> : null}
+      {tab === 'works' ? <section className="studio-list" aria-label={t.admin.title}>
+        {items.length === 0 ? <p className="studio-empty">{t.admin.empty}</p> : null}
         <ul className="studio-items">
           {items.map((item) => (
             <li key={item.id} className="studio-item">
               {item.image ? <img src={item.image} alt="" /> : <span className="studio-item-empty" />}
               <div>
                 <p className="studio-item-title">{item.title}</p>
-                <p className="studio-item-meta">{item.category}{item.featured ? ' · featured' : ''}</p>
+                <p className="studio-item-meta">{item.category}{item.featuredOrder ? ` · ${item.featuredOrder}` : ''}</p>
               </div>
               <div className="studio-item-actions">
                 <button type="button" onClick={() => openEdit(item)}>{t.admin.edit}</button>
@@ -405,7 +502,7 @@ export default function Admin() {
             </li>
           ))}
         </ul>
-      </section>
+      </section> : null}
     </main>
   )
 }
