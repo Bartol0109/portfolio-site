@@ -227,7 +227,6 @@ export default function Home() {
   const { t } = useLanguage()
   const preview = isDevPreview()
   const [previewNote, setPreviewNote] = useState(false)
-  const heroRef = useRef(null)
   const [motionOk, setMotionOk] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [picks, setPicks] = useState(FALLBACK_PICKS)
   useReveal(t.about.title)
@@ -250,35 +249,6 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    const el = heroRef.current
-    if (!el || !motionOk) return undefined
-    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-    const setSpot = (x, y) => {
-      el.style.setProperty('--spot-x', x)
-      el.style.setProperty('--spot-y', y)
-    }
-    const onPointer = (e) => {
-      const rect = el.getBoundingClientRect()
-      if (!rect.width || !rect.height) return
-      setSpot(`${((e.clientX - rect.left) / rect.width) * 100}%`, `${((e.clientY - rect.top) / rect.height) * 100}%`)
-    }
-    const onScroll = () => {
-      const rect = el.getBoundingClientRect()
-      const passed = Math.min(1, Math.max(0, -rect.top / (rect.height || 1)))
-      setSpot('68%', `${18 + passed * 50}%`)
-    }
-    el.addEventListener('pointermove', onPointer)
-    if (!fine) {
-      onScroll()
-      window.addEventListener('scroll', onScroll, { passive: true })
-    }
-    return () => {
-      el.removeEventListener('pointermove', onPointer)
-      window.removeEventListener('scroll', onScroll)
-    }
-  }, [motionOk])
-
-  useEffect(() => {
     setPreviewNote(false)
   }, [t.contact.preview])
 
@@ -292,7 +262,7 @@ export default function Home() {
     <>
       <div className="landing-wrap">
         <main className="main">
-          <section className={`hero${motionOk ? ' hero-live' : ''}`} ref={heroRef}>
+          <section className={`hero${motionOk ? ' hero-live' : ''}`}>
             <HeroKicker lines={t.hero.kicker} />
             <div className="hero-mast">
               <figure className="hero-portrait">

@@ -401,6 +401,10 @@ export default function ProjectDetail() {
           </div>
         )}
 
+        {isDbProject && (
+          <GallerySection project={project} isAdmin={isAdmin} onGalleryChange={loadProject} />
+        )}
+
         <div className="project-detail-content-row">
           <div className="project-detail-desc-col">
             <p className="project-detail-section-label">{t.portfolio.description}</p>
@@ -423,13 +427,6 @@ export default function ProjectDetail() {
             </div>
           )}
         </div>
-
-        {isDbProject && (
-          <div className="project-detail-gallery-full">
-            <p className="project-detail-section-label">{t.portfolio.gallery}</p>
-            <GallerySection project={project} isAdmin={isAdmin} onGalleryChange={loadProject} />
-          </div>
-        )}
 
         {isAdmin && isDbProject && (
           <div className="project-save-row">
